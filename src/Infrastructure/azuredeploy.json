@@ -20,12 +20,11 @@
                 "name": "Standard_LRS",
                 "tier": "Standard"
             },
-            "kind": "BlobStorage",
+            "kind": "Storage",
             "name": "[variables('storageAccountName')]",
             "apiVersion": "2016-01-01",
             "location": "[resourceGroup().location]",
-            "properties": {
-                "accessTier": "Hot"
+            "properties": { 
             },
             "dependsOn": []
         },
