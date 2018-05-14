@@ -103,7 +103,7 @@
         },
         "functionAppName": {
             "type": "string",
-            "value": "[reference(variables('cdnProfileEndpointName')).hostName]"
+            "value": "[reference(variables('functionAppName')).hostName]"
         },
         "applicationInsightsInstrumentationKey": {
             "type": "string",
