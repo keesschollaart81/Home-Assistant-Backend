@@ -10,7 +10,7 @@
         "prefix": "kees-homeassistant-backend-",
         "functionHostingplanAppName": "[concat(variables('prefix'),'functionHostingPlan')]",
         "functionAppName": "[concat(variables('prefix'),'functions')]",
-        "appInsightsAppName": "[concat(variables('prefix'),'appinsights')]",
+        "applicationInsightsName": "[concat(variables('prefix'),'appinsights')]",
         "storageAccountName": "[concat(variables('prefix'),'storage')]"
     },
     "resources": [
@@ -76,7 +76,7 @@
             "dependsOn": [
                 "[resourceId('Microsoft.Web/serverfarms', variables('functionHostingplanAppName'))]",
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
-                "[resourceId('microsoft.insights/components', variables('appInsightsAppName'))]"
+                "[resourceId('microsoft.insights/components', variables('applicationInsightsName'))]"
             ]
         },
         {
