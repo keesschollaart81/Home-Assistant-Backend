@@ -1,0 +1,6 @@
+{
+  "azureFunctions.projectLanguage": "C#",
+  "azureFunctions.projectRuntime": "beta",
+  "azureFunctions.templateFilter": "Verified",
+  "azureFunctions.deploySubpath": "bin/Debug/netstandard2.0"
+}
