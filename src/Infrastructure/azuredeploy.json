@@ -4,7 +4,11 @@
     "parameters": {
         "MqttConnectionString":{
             "type": "securestring"
+        },
+        "MqttConnectionStringForSnapshots":{
+            "type": "securestring"
         }
+
     },
     "variables": { 
         "prefix": "keeshassiobackend",
@@ -64,6 +68,10 @@
                         {
                             "name": "MqttConnection",
                             "value": "[parameters('MqttConnectionString')]"
+                        },
+                        {
+                            "name": "MqttConnectionForSnapshots",
+                            "value": "[parameters('MqttConnectionStringForSnapshots')]"
                         },
                         {
                             "name":"APPINSIGHTS_INSTRUMENTATIONKEY",
