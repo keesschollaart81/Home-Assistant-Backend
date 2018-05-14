@@ -7,10 +7,11 @@
         }
     },
     "variables": { 
-        "functionHostingplanAppName": "keeshomeassistantbackend",
-        "functionAppName": "keeshomeassistantbackend",
-        "applicationInsightsName": "keeshomeassistantbackend",
-        "storageAccountName": "keeshomeassistantbackend"
+        "prefix": "keeshassiobackend",
+        "functionHostingplanAppName": "[concat(variables('prefix'),'hp')]",
+        "functionAppName": "[concat(variables('prefix'),'fa')]",
+        "applicationInsightsName": "[concat(variables('prefix'),'ai')]",
+        "storageAccountName": "[concat(variables('prefix'),'st')]"
     },
     "resources": [
         {
