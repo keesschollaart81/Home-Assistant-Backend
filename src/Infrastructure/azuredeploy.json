@@ -11,7 +11,7 @@
         "functionHostingplanAppName": "[concat(variables('prefix'),'functionHostingPlan')]",
         "functionAppName": "[concat(variables('prefix'),'functions')]",
         "applicationInsightsName": "[concat(variables('prefix'),'appinsights')]",
-        "storageAccountName": "[concat(variables('prefix'),'storage')]"
+        "storageAccountName": "keeshomeassistantbackendstorage"
     },
     "resources": [
         {
