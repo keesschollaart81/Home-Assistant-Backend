@@ -16,14 +16,14 @@ namespace Functions
     {
         [FunctionName("ReceiveSnapshotsFunction")]
         public static void ReceiveSnapshotsFunction(
-            [MqttTrigger("dafang/dafang/motion/snapshot")]IMqttMessage snapshop,
+            [MqttTrigger("dafang/dafang/motion/snapshot", ConnectionString = "MqttConnectionForSnapshots")]IMqttMessage snapshop,
             [Blob("snapshots/{sys.utcnow}.png", FileAccess.Write)] Stream outputBlob,
              ILogger log)
         {
-            log.LogInformation("Receiving blob"); 
+            log.LogInformation("Receiving blob");
 
-            var bytes = snapshop.GetMessage(); 
-            outputBlob.Write(bytes,0, bytes.Length);
+            var bytes = snapshop.GetMessage();
+            outputBlob.Write(bytes, 0, bytes.Length);
         }
     }
 }
