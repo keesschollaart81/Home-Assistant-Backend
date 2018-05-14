@@ -6,12 +6,11 @@
             "type": "securestring"
         }
     },
-    "variables": {
-        "prefix": "kees-homeassistant-backend-",
-        "functionHostingplanAppName": "[concat(variables('prefix'),'functionHostingPlan')]",
-        "functionAppName": "[concat(variables('prefix'),'functions')]",
-        "applicationInsightsName": "[concat(variables('prefix'),'appinsights')]",
-        "storageAccountName": "keeshomeassistantbackendstorage"
+    "variables": { 
+        "functionHostingplanAppName": "keeshomeassistantbackend",
+        "functionAppName": "keeshomeassistantbackend",
+        "applicationInsightsName": "keeshomeassistantbackend",
+        "storageAccountName": "keeshomeassistantbackend"
     },
     "resources": [
         {
