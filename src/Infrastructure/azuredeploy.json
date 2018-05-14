@@ -103,7 +103,7 @@
         },
         "functionAppName": {
             "type": "string",
-            "value": "[reference(variables('functionAppName')).hostName]"
+            "value": "[variables('functionAppName')]"
         },
         "applicationInsightsInstrumentationKey": {
             "type": "string",
