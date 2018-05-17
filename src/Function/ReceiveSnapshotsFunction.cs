@@ -39,7 +39,7 @@ namespace Functions
             {
                 var client = new HttpClient();
                 var authHeaderValue = Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes($"{username}:{password}"));
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authHeaderValue));
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authHeaderValue);
 
                 var response = await client.GetAsync(camUrl);
                 var outBytes = await response.Content.ReadAsByteArrayAsync();
