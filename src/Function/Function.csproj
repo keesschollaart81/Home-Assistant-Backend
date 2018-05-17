@@ -5,7 +5,8 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.13" />
-    <PackageReference Include="CaseOnline.Azure.WebJobs.Extensions.Mqtt" Version="0.9.2-beta"/>
+    <PackageReference Include="CaseOnline.Azure.WebJobs.Extensions.Mqtt" Version="0.9.3-beta.545" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.4.1" />
   </ItemGroup>
   <ItemGroup>
     <None Update="host.json">
