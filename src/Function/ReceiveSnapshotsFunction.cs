@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using System.Net.Http.Headers;
 using System;
 using System.Configuration;
+using Microsoft.Extensions.Configuration;
 
 namespace Functions
 {
@@ -24,13 +25,20 @@ namespace Functions
         public static async Task MotionFunction(
         [MqttTrigger("dafang/dafang/motion", ConnectionString = "MqttConnectionForMotion")]IMqttMessage snapshop,
         [Blob("snapshots/{sys.utcnow}.png", FileAccess.Write)] Stream outputBlob,
-        ILogger log)
+        ILogger log,
+        ExecutionContext context)
         {
             log.LogInformation("Receiving blob");
 
-            var camUrl = ConfigurationManager.AppSettings["CamUrl"];
-            var username = ConfigurationManager.AppSettings["CamUsername"];
-            var password = ConfigurationManager.AppSettings["CamPassword"];
+            var config = new ConfigurationBuilder()
+                .SetBasePath(context.FunctionAppDirectory)
+                .AddJsonFile("local.settings.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables()
+                .Build();
+
+            var camUrl = config["CamUrl"];
+            var username = config["CamUsername"];
+            var password = config["CamPassword"];
 
             var bytes = snapshop.GetMessage();
             var on = Encoding.UTF8.GetString(bytes) == "ON";
