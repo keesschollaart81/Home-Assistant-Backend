@@ -28,7 +28,6 @@ namespace Functions
         ILogger log,
         ExecutionContext context)
         {
-            log.LogInformation("Receiving blob");
 
             var config = new ConfigurationBuilder()
                 .SetBasePath(context.FunctionAppDirectory)
@@ -41,8 +40,10 @@ namespace Functions
             var password = config["CamPassword"];
 
             var bytes = snapshop.GetMessage();
-            var on = Encoding.UTF8.GetString(bytes) == "ON";
+            var messageBody = Encoding.UTF8.GetString(bytes);
+            var on = messageBody == "ON";
 
+            log.LogInformation($"Message: {messageBody}");
             if (on)
             {
                 var client = new HttpClient();
@@ -50,9 +51,15 @@ namespace Functions
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authHeaderValue);
 
                 var response = await client.GetAsync(camUrl);
+                response.EnsureSuccessStatusCode();
                 var outBytes = await response.Content.ReadAsByteArrayAsync();
 
-                outputBlob.Write(outBytes, 0, outBytes.Length);
+                log.LogInformation($"Blob received, size {outBytes.Length}");
+
+                if (outBytes.Length > 0)
+                {
+                    outputBlob.Write(outBytes, 0, outBytes.Length);
+                }
             }
         }
     }
