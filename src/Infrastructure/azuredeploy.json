@@ -16,8 +16,13 @@
     },
     "CamPassword": {
       "type": "securestring"
+    },
+    "VisionApiPredictionKey": {
+      "type": "securestring"
+    },
+    "VisionApiProjectId": {
+      "type": "string"
     }
-
   },
   "variables": {
     "prefix": "keeshassiobackend",
@@ -93,6 +98,14 @@
             {
               "name": "CamPassword",
               "value": "[parameters('CamPassword')]"
+            },
+            {
+              "name": "VisionApiPredictionKey",
+              "value": "[parameters('VisionApiPredictionKey')]"
+            },
+            {
+              "name": "VisionApiProjectId",
+              "value": "[parameters('VisionApiProjectId')]"
             },
             {
               "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
