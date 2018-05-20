@@ -18,10 +18,11 @@ using System.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Azure.CognitiveServices.Vision.CustomVision.Prediction;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace Functions
 {
-    public static class Functions
+    public static partial class Functions
     {
         [FunctionName("MotionFunction")]
         public static async Task MotionFunction(
@@ -32,21 +33,10 @@ namespace Functions
         ExecutionContext context)
         {
 
-            var config = new ConfigurationBuilder()
-                .SetBasePath(context.FunctionAppDirectory)
-                .AddJsonFile("local.settings.json", optional: true, reloadOnChange: true)
-                .AddEnvironmentVariables()
-                .Build();
-
-            var camUrl = config["CamUrl"];
-            var username = config["CamUsername"];
-            var password = config["CamPassword"];
-            var predictionKey = config["VisionApiPredictionKey"];
-            var projectId = config["VisionApiProjectId"]; 
 
             var bytes = snapshop.GetMessage();
             var messageBody = Encoding.UTF8.GetString(bytes);
-            var on = messageBody == "ON"; 
+            var on = messageBody == "ON";
 
             if (!on)
             {
@@ -56,8 +46,46 @@ namespace Functions
                 return;
             }
 
+            var motionDetectionResult = await DetectMotionAsync(log, context);
+            outputBlob.Write(motionDetectionResult.ImageBytes, 0, motionDetectionResult.ImageBytes.Length);
+            foreach (var mqttMessage in motionDetectionResult.MqttMessages)
+            {
+                outMessages.Add(mqttMessage);
+            }
+
+        }
+
+        private class DetectMotionResult
+        {
+            public byte[] ImageBytes { get; set; }
+            public IList<MqttMessage> MqttMessages { get; set; }
+
+            public DetectMotionResult()
+            {
+                MqttMessages = new List<MqttMessage>();
+            }
+        }
+        private static async Task<DetectMotionResult> DetectMotionAsync(
+            ILogger log,
+            ExecutionContext context
+             )
+        {
+            var result = new DetectMotionResult();
             try
             {
+
+                var config = new ConfigurationBuilder()
+                    .SetBasePath(context.FunctionAppDirectory)
+                    .AddJsonFile("local.settings.json", optional: true, reloadOnChange: true)
+                    .AddEnvironmentVariables()
+                    .Build();
+
+                var camUrl = config["CamUrl"];
+                var username = config["CamUsername"];
+                var password = config["CamPassword"];
+                var predictionKey = config["VisionApiPredictionKey"];
+                var projectId = config["VisionApiProjectId"];
+
                 log.LogInformation($"Getting the camera's image...");
 
                 var client = new HttpClient();
@@ -72,50 +100,46 @@ namespace Functions
 
                 if (outBytes.Length > 0)
                 {
-                    outputBlob.Write(outBytes, 0, outBytes.Length);
+                    result.ImageBytes = outBytes;
 
                     var endpoint = new PredictionEndpoint() { ApiKey = predictionKey };
                     using (var stream = new MemoryStream(outBytes))
                     {
-                        var result = endpoint.PredictImage(new Guid(projectId), stream);
+                        var predictionResult = endpoint.PredictImage(new Guid(projectId), stream);
 
-                        foreach (var c in result.Predictions)
+                        foreach (var c in predictionResult.Predictions)
                         {
                             log.LogDebug($"\t{c.TagName}: {c.Probability:P1} [ {c.BoundingBox.Left}, {c.BoundingBox.Top}, {c.BoundingBox.Width}, {c.BoundingBox.Height} ]");
                         }
 
-                        var meaningfulPredictions = result.Predictions.Where(x => x.Probability > 0.15);
+                        var meaningfulPredictions = predictionResult.Predictions.Where(x => x.Probability > 0.15);
 
                         var doorPrediction = meaningfulPredictions.Where(x => x.TagName.Contains("door")).OrderByDescending(x => x.Probability).FirstOrDefault();
                         var doorOpen = doorPrediction.TagName == "door-open";
                         var envelopeBodyDoor = doorOpen ? "open" : "closed";
-                        outMessages.Add(new MqttMessage("motion/door", Encoding.UTF8.GetBytes(envelopeBodyDoor), MqttQualityOfServiceLevel.AtLeastOnce, true));
+                        result.MqttMessages.Add(new MqttMessage("motion/door", Encoding.UTF8.GetBytes(envelopeBodyDoor), MqttQualityOfServiceLevel.AtLeastOnce, true));
 
                         var gatePrediction = meaningfulPredictions.Where(x => x.TagName.Contains("gate")).OrderByDescending(x => x.Probability).FirstOrDefault();
                         var gateOpen = gatePrediction.TagName == "gate-open";
                         var envelopeBodyGate = gateOpen ? "open" : "closed";
-                        outMessages.Add(new MqttMessage("motion/gate", Encoding.UTF8.GetBytes(envelopeBodyGate), MqttQualityOfServiceLevel.AtLeastOnce, true));
+                        result.MqttMessages.Add(new MqttMessage("motion/gate", Encoding.UTF8.GetBytes(envelopeBodyGate), MqttQualityOfServiceLevel.AtLeastOnce, true));
 
                         var bikeMarleen = meaningfulPredictions.Any(x => x.TagName == "bike-marleen");
                         var envelopeBodyBikeMarleen = bikeMarleen ? "visible" : "unvisible";
-                        outMessages.Add(new MqttMessage("motion/bike/marleen", Encoding.UTF8.GetBytes(envelopeBodyBikeMarleen), MqttQualityOfServiceLevel.AtLeastOnce, true));
+                        result.MqttMessages.Add(new MqttMessage("motion/bike/marleen", Encoding.UTF8.GetBytes(envelopeBodyBikeMarleen), MqttQualityOfServiceLevel.AtLeastOnce, true));
 
                         var bikeJasmijn = meaningfulPredictions.Any(x => x.TagName == "bike-jasmijn");
                         var envelopeBodyBikeJasmijn = bikeJasmijn ? "visible" : "unvisible";
-                        outMessages.Add(new MqttMessage("motion/bike/jasmijn", Encoding.UTF8.GetBytes(envelopeBodyBikeJasmijn), MqttQualityOfServiceLevel.AtLeastOnce, true));
+                        result.MqttMessages.Add(new MqttMessage("motion/bike/jasmijn", Encoding.UTF8.GetBytes(envelopeBodyBikeJasmijn), MqttQualityOfServiceLevel.AtLeastOnce, true));
                     }
                 }
             }
             catch (Exception ex)
             {
                 log.LogWarning(new EventId(0), ex, $"Unhandled Exception while processing motion detection: {ex.Message}");
+                throw;
             }
-        }
-
-        [FunctionName("TimerTest")]
-        public static void TimerFunction([TimerTrigger("0 */1 * * * *")]TimerInfo timerInfo, ILogger log)
-        {
-            log.LogInformation($"TimerFunction: {DateTime.Now:g}");
+            return result;
         }
     }
 }
