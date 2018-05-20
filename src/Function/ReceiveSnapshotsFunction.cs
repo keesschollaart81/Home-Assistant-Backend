@@ -55,5 +55,11 @@ namespace Functions
                 outputBlob.Write(outBytes, 0, outBytes.Length);
             }
         }
+
+        [FunctionName("TimerTest")]
+        public static void TimerFunction([TimerTrigger("0 */1 * * * *")]TimerInfo timerInfo, ILogger log)
+        {
+            log.LogInformation($"TimerFunction: {DateTime.Now:g}");
+        }
     }
 }
