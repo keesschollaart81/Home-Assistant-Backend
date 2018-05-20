@@ -28,7 +28,7 @@ namespace Functions
         public static async Task MotionFunction(
         [MqttTrigger("dafang/dafang/motion", ConnectionString = "MqttConnectionForMotion")]IMqttMessage snapshop,
         [Mqtt(ConnectionString = "MqttConnectionForMotion")] ICollector<IMqttMessage> outMessages,
-        [Blob("snapshots/{sys.utcnow}.png", FileAccess.Write)] Stream outputBlob,
+        [Blob("motion/{sys.utcnow}.png", FileAccess.Write)] Stream outputBlob,
         ILogger log,
         ExecutionContext context)
         {
@@ -115,13 +115,11 @@ namespace Functions
                         var meaningfulPredictions = predictionResult.Predictions.Where(x => x.Probability > 0.15);
 
                         var doorPrediction = meaningfulPredictions.Where(x => x.TagName.Contains("door")).OrderByDescending(x => x.Probability).FirstOrDefault();
-                        var doorOpen = doorPrediction.TagName == "door-open";
-                        var envelopeBodyDoor = doorOpen ? "open" : "closed";
+                        var envelopeBodyDoor = doorPrediction == null ? "unkwown" : doorPrediction.TagName == "door-open" ? "open" : "closed";
                         result.MqttMessages.Add(new MqttMessage("motion/door", Encoding.UTF8.GetBytes(envelopeBodyDoor), MqttQualityOfServiceLevel.AtLeastOnce, true));
 
                         var gatePrediction = meaningfulPredictions.Where(x => x.TagName.Contains("gate")).OrderByDescending(x => x.Probability).FirstOrDefault();
-                        var gateOpen = gatePrediction.TagName == "gate-open";
-                        var envelopeBodyGate = gateOpen ? "open" : "closed";
+                        var envelopeBodyGate = gatePrediction == null ? "unkwown" : gatePrediction.TagName == "gate-open" ? "open" : "closed";
                         result.MqttMessages.Add(new MqttMessage("motion/gate", Encoding.UTF8.GetBytes(envelopeBodyGate), MqttQualityOfServiceLevel.AtLeastOnce, true));
 
                         var bikeMarleen = meaningfulPredictions.Any(x => x.TagName == "bike-marleen");

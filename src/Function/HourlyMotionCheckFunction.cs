@@ -27,7 +27,7 @@ namespace Functions
         [FunctionName("HourlyMotionCheckFunction")]
         public static async Task HourlyMotionCheckFunction([TimerTrigger("0 0 * * * *")]TimerInfo timerInfo,
         [Mqtt(ConnectionString = "MqttConnectionForMotion")] ICollector<IMqttMessage> outMessages,
-        [Blob("snapshots/{sys.utcnow}.png", FileAccess.Write)] Stream outputBlob,
+        [Blob("motion-hourly/{sys.utcnow}.png", FileAccess.Write)] Stream outputBlob,
         ILogger log,
         ExecutionContext context)
         {
