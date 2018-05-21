@@ -20,6 +20,12 @@ using Microsoft.Azure.CognitiveServices.Vision.CustomVision.Prediction;
 using System.Linq;
 using System.Collections.Generic;
 using Microsoft.WindowsAzure.Storage.Blob;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Processing.Transforms;
+using SixLabors.ImageSharp.Processing.Filters;
+using SixLabors.ImageSharp.Formats.Jpeg;
 
 namespace Functions
 {
@@ -32,7 +38,7 @@ namespace Functions
         [Blob("motion/{sys.utcnow}.png", FileAccess.Write)] CloudBlockBlob outputBlob,
         ILogger log,
         ExecutionContext context)
-        { 
+        {
             var bytes = snapshop.GetMessage();
             var messageBody = Encoding.UTF8.GetString(bytes);
             var on = messageBody == "ON";
@@ -49,7 +55,7 @@ namespace Functions
             foreach (var mqttMessage in motionDetectionResult.MqttMessages)
             {
                 outMessages.Add(mqttMessage);
-            } 
+            }
         }
 
         private class DetectMotionResult
@@ -97,8 +103,6 @@ namespace Functions
 
                 if (outBytes.Length > 0)
                 {
-                    result.ImageBytes = outBytes;
-
                     var endpoint = new PredictionEndpoint() { ApiKey = predictionKey };
                     using (var stream = new MemoryStream(outBytes))
                     {
@@ -126,6 +130,24 @@ namespace Functions
                         var bikeJasmijn = meaningfulPredictions.Any(x => x.TagName == "bike-jasmijn");
                         var envelopeBodyBikeJasmijn = bikeJasmijn ? "visible" : "unvisible";
                         result.MqttMessages.Add(new MqttMessage("motion/bike/jasmijn", Encoding.UTF8.GetBytes(envelopeBodyBikeJasmijn), MqttQualityOfServiceLevel.AtLeastOnce, true));
+                    }
+                    result.ImageBytes = outBytes;
+
+                    try
+                    {
+                        using (var image = Image.Load(outBytes))
+                        using (var ms = new MemoryStream())
+                        {
+                            image.Save(ms, new JpegEncoder()); // applies compression
+                            result.ImageBytes = ms.ToArray();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        log.LogWarning(new EventId(0), ex, "Image compression failed...");
+                        // ignore while:
+                        // https://github.com/Azure/azure-functions-host/issues/2856
+                        // https://github.com/Azure/azure-functions-host/issues/2856
                     }
                 }
             }
