@@ -19,6 +19,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Azure.CognitiveServices.Vision.CustomVision.Prediction;
 using System.Linq;
 using System.Collections.Generic;
+using Microsoft.WindowsAzure.Storage.Blob;
 
 namespace Functions
 {
@@ -28,12 +29,10 @@ namespace Functions
         public static async Task MotionFunction(
         [MqttTrigger("dafang/dafang/motion", ConnectionString = "MqttConnectionForMotion")]IMqttMessage snapshop,
         [Mqtt(ConnectionString = "MqttConnectionForMotion")] ICollector<IMqttMessage> outMessages,
-        [Blob("motion/{sys.utcnow}.png", FileAccess.Write)] Stream outputBlob,
+        [Blob("motion/{sys.utcnow}.png", FileAccess.Write)] CloudBlockBlob outputBlob,
         ILogger log,
         ExecutionContext context)
-        {
-
-
+        { 
             var bytes = snapshop.GetMessage();
             var messageBody = Encoding.UTF8.GetString(bytes);
             var on = messageBody == "ON";
@@ -41,18 +40,16 @@ namespace Functions
             if (!on)
             {
                 log.LogInformation($"Message: {messageBody}");
-
-                outputBlob = null;
+                //await outputBlob.DeleteAsync();
                 return;
             }
 
             var motionDetectionResult = await DetectMotionAsync(log, context);
-            outputBlob.Write(motionDetectionResult.ImageBytes, 0, motionDetectionResult.ImageBytes.Length);
+            await outputBlob.UploadFromByteArrayAsync(motionDetectionResult.ImageBytes, 0, motionDetectionResult.ImageBytes.Length);
             foreach (var mqttMessage in motionDetectionResult.MqttMessages)
             {
                 outMessages.Add(mqttMessage);
-            }
-
+            } 
         }
 
         private class DetectMotionResult
