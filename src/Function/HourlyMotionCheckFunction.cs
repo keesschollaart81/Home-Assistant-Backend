@@ -23,7 +23,7 @@ using System.Collections.Generic;
 namespace Functions
 {
     public static partial class Functions
-    { 
+    {
         [FunctionName("HourlyMotionCheckFunction")]
         public static async Task HourlyMotionCheckFunction([TimerTrigger("0 0 * * * *")]TimerInfo timerInfo,
         [Mqtt(ConnectionString = "MqttConnectionForMotion")] ICollector<IMqttMessage> outMessages,
@@ -31,12 +31,20 @@ namespace Functions
         ILogger log,
         ExecutionContext context)
         {
-            var motionDetectionResult = await DetectMotionAsync(log, context);
+            if (DateTime.Now.IsDarkOutside())
+            {
+                log.LogInformation("Hourly motion check but currently it's dark outside");
+            }
+
+            var motionConfiguration = new MotionConfiguration(context);
+            var motionService = new MotionService(motionConfiguration, log);
+            var motionDetectionResult = await motionService.DetectMotionAsync();
+            
             outputBlob.Write(motionDetectionResult.ImageBytes, 0, motionDetectionResult.ImageBytes.Length);
             foreach (var mqttMessage in motionDetectionResult.MqttMessages)
             {
                 outMessages.Add(mqttMessage);
             }
-        } 
+        }
     }
 }
