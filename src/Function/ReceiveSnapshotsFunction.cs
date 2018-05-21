@@ -117,11 +117,16 @@ namespace Functions
 
                         var doorPrediction = meaningfulPredictions.Where(x => x.TagName.Contains("door")).OrderByDescending(x => x.Probability).FirstOrDefault();
                         var envelopeBodyDoor = doorPrediction == null ? "unkwown" : doorPrediction.TagName == "door-open" ? "open" : "closed";
-                        result.MqttMessages.Add(new MqttMessage("motion/door", Encoding.UTF8.GetBytes(envelopeBodyDoor), MqttQualityOfServiceLevel.AtLeastOnce, true));
-
+                        if (envelopeBodyDoor != "unkwown")
+                        {
+                            result.MqttMessages.Add(new MqttMessage("motion/door", Encoding.UTF8.GetBytes(envelopeBodyDoor), MqttQualityOfServiceLevel.AtLeastOnce, true));
+                        }
                         var gatePrediction = meaningfulPredictions.Where(x => x.TagName.Contains("gate")).OrderByDescending(x => x.Probability).FirstOrDefault();
                         var envelopeBodyGate = gatePrediction == null ? "unkwown" : gatePrediction.TagName == "gate-open" ? "open" : "closed";
-                        result.MqttMessages.Add(new MqttMessage("motion/gate", Encoding.UTF8.GetBytes(envelopeBodyGate), MqttQualityOfServiceLevel.AtLeastOnce, true));
+                        if (envelopeBodyGate != "unkwown")
+                        {
+                            result.MqttMessages.Add(new MqttMessage("motion/gate", Encoding.UTF8.GetBytes(envelopeBodyGate), MqttQualityOfServiceLevel.AtLeastOnce, true));
+                        }
 
                         var bikeMarleen = meaningfulPredictions.Any(x => x.TagName == "bike-marleen");
                         var envelopeBodyBikeMarleen = bikeMarleen ? "visible" : "not visible";
