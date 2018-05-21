@@ -43,12 +43,12 @@ namespace Functions
             var messageBody = Encoding.UTF8.GetString(bytes);
             var on = messageBody == "ON";
 
-            if (!on)
-            {
-                log.LogInformation($"Message: {messageBody}");
-                //await outputBlob.DeleteAsync();
-                return;
-            }
+            // if (!on)
+            // {
+            //     log.LogInformation($"Message: {messageBody}");
+            //     //await outputBlob.DeleteAsync();
+            //     return;
+            // }
 
             var motionDetectionResult = await DetectMotionAsync(log, context);
             await outputBlob.UploadFromByteArrayAsync(motionDetectionResult.ImageBytes, 0, motionDetectionResult.ImageBytes.Length);
