@@ -124,11 +124,11 @@ namespace Functions
                         result.MqttMessages.Add(new MqttMessage("motion/gate", Encoding.UTF8.GetBytes(envelopeBodyGate), MqttQualityOfServiceLevel.AtLeastOnce, true));
 
                         var bikeMarleen = meaningfulPredictions.Any(x => x.TagName == "bike-marleen");
-                        var envelopeBodyBikeMarleen = bikeMarleen ? "visible" : "unvisible";
+                        var envelopeBodyBikeMarleen = bikeMarleen ? "visible" : "not visible";
                         result.MqttMessages.Add(new MqttMessage("motion/bike/marleen", Encoding.UTF8.GetBytes(envelopeBodyBikeMarleen), MqttQualityOfServiceLevel.AtLeastOnce, true));
 
                         var bikeJasmijn = meaningfulPredictions.Any(x => x.TagName == "bike-jasmijn");
-                        var envelopeBodyBikeJasmijn = bikeJasmijn ? "visible" : "unvisible";
+                        var envelopeBodyBikeJasmijn = bikeJasmijn ? "visible" : "not visible";
                         result.MqttMessages.Add(new MqttMessage("motion/bike/jasmijn", Encoding.UTF8.GetBytes(envelopeBodyBikeJasmijn), MqttQualityOfServiceLevel.AtLeastOnce, true));
                     }
                     result.ImageBytes = outBytes;
@@ -146,7 +146,7 @@ namespace Functions
                     {
                         log.LogWarning(new EventId(0), ex, "Image compression failed...");
                         // ignore while:
-                        // https://github.com/Azure/azure-functions-host/issues/2856
+                        // https://github.com/SixLabors/ImageSharp/issues/574
                         // https://github.com/Azure/azure-functions-host/issues/2856
                     }
                 }
