@@ -19,6 +19,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Azure.CognitiveServices.Vision.CustomVision.Prediction;
 using System.Linq;
 using System.Collections.Generic;
+using Microsoft.WindowsAzure.Storage.Blob;
 
 namespace Functions
 {
@@ -26,21 +27,22 @@ namespace Functions
     {
         [FunctionName("HourlyMotionCheckFunction")]
         public static async Task HourlyMotionCheckFunction([TimerTrigger("0 0 * * * *")]TimerInfo timerInfo,
-        [Mqtt(ConnectionString = "MqttConnectionForMotion")] ICollector<IMqttMessage> outMessages,
-        [Blob("motion-hourly/{sys.utcnow}.png", FileAccess.Write)] Stream outputBlob,
+        [Mqtt(ConnectionString = "MqttConnectionForMotion")] ICollector<IMqttMessage> outMessages, 
+        [Blob("motion-hourly/{sys.utcnow}.png", FileAccess.Write)] CloudBlockBlob outputBlob,
         ILogger log,
         ExecutionContext context)
         {
             if (DateTime.Now.IsDarkOutside())
             {
                 log.LogInformation("Hourly motion check but currently it's dark outside");
+                return;
             }
 
             var motionConfiguration = new MotionConfiguration(context);
             var motionService = new MotionService(motionConfiguration, log);
             var motionDetectionResult = await motionService.DetectMotionAsync();
             
-            outputBlob.Write(motionDetectionResult.ImageBytes, 0, motionDetectionResult.ImageBytes.Length);
+            await outputBlob.UploadFromByteArrayAsync(motionDetectionResult.ImageBytes, 0, motionDetectionResult.ImageBytes.Length);
             foreach (var mqttMessage in motionDetectionResult.MqttMessages)
             {
                 outMessages.Add(mqttMessage);
