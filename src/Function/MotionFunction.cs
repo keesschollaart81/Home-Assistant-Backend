@@ -34,6 +34,7 @@ namespace Functions
             if (DateTime.Now.IsDarkOutside())
             {
                 log.LogInformation("Received motion but it's dark outside");
+                return;
             }
 
             var motionConfiguration = new MotionConfiguration(context);
