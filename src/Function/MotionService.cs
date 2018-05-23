@@ -93,11 +93,10 @@ namespace Functions
 
         private async Task<IEnumerable<PredictionModel>> GetMeaningfulpredictions(byte[] image)
         {
-            var endpoint = new PredictionEndpoint() { ApiKey = _config.PredictionKey };
-            ImagePrediction predictionResult;
             using (var stream = new MemoryStream(image))
             {
-                predictionResult = await endpoint.PredictImageAsync(new Guid(_config.ProjectId), stream);
+                var endpoint = new PredictionEndpoint() { ApiKey = _config.PredictionKey };
+                var predictionResult = await endpoint.PredictImageAsync(new Guid(_config.ProjectId), stream);
 
                 foreach (var c in predictionResult.Predictions)
                 {
