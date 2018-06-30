@@ -29,7 +29,8 @@
     "functionHostingplanAppName": "[concat(variables('prefix'),'hp')]",
     "functionAppName": "[concat(variables('prefix'),'fa')]",
     "applicationInsightsName": "[concat(variables('prefix'),'ai')]",
-    "storageAccountName": "[concat(variables('prefix'),'st')]"
+    "storageAccountName": "[concat(variables('prefix'),'st')]",
+    "alertRuleNoMotionName": "[concat(variables('prefix'),'ar-nomotion')]"
   },
   "resources": [
     {
@@ -42,8 +43,7 @@
       "name": "[variables('storageAccountName')]",
       "apiVersion": "2016-01-01",
       "location": "[resourceGroup().location]",
-      "properties": {
-      },
+      "properties": {},
       "dependsOn": []
     },
     {
@@ -131,6 +131,32 @@
         "ApplicationId": "[variables('applicationInsightsName')]"
       },
       "dependsOn": []
+    },
+    {
+      "type": "microsoft.insights/scheduledqueryrules",
+      "name": "[variables('alertRuleNoMotionName')]",
+      "apiVersion": "2018-04-16",
+      "location": "westeurope",
+      "properties": {
+        "description": "No motion for 24 hr",
+        "enabled": "true",
+        "source": {
+          "query": "requests\n| where name == 'MotionFunction'",
+          "authorizedResources": [],
+          "dataSourceId": "[resourceId('microsoft.insights/components', variables('applicationInsightsName'))]",
+          "queryType": "ResultCount"
+        },
+        "schedule": {
+          "frequencyInMinutes": 1440,
+          "timeWindowInMinutes": 1440
+        },
+        "action": {
+          "odata.type": "Microsoft.WindowsAzure.Management.Monitoring.Alerts.Models.Microsoft.AppInsights.Nexus.DataContracts.Resources.ScheduledQueryRules.AlertingAction"
+        }
+      },
+      "dependsOn": [
+        "[resourceId('microsoft.insights/components', variables('applicationInsightsName'))]"
+      ]
     }
   ],
   "outputs": {
