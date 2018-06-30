@@ -159,7 +159,7 @@
           "severity": "1",
           "aznsAction": {
             "actionGroup": [
-              "KeesMail"
+              "[resourceId('microsoft.insights/actionGroups', 'KeesMail')]"
             ],
             "emailSubject": "No motion detection for 24 hours",
             "customWebhookPayload": "{}"
