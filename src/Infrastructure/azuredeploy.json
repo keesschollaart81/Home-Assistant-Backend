@@ -53,8 +53,7 @@
       "location": "[resourceGroup().location]",
       "properties": {
         "name": "[variables('functionHostingplanAppName')]",
-        "computeMode": "Dynamic",
-        "sku": "Dynamic"
+        "sku": "B1"
       }
     },
     {
