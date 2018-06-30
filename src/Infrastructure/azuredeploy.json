@@ -53,7 +53,9 @@
       "location": "[resourceGroup().location]",
       "properties": {
         "name": "[variables('functionHostingplanAppName')]",
-        "sku": "B1"
+        "sku": {
+          "name": "B1"
+        }
       }
     },
     {
@@ -136,7 +138,7 @@
       "name": "[variables('alertRuleNoMotionName')]",
       "apiVersion": "2018-04-16",
       "tags": {
-          "[concat('hidden-link:',resourceGroup().id,'/providers/microsoft.insights/components/',variables('applicationInsightsName'))]": "Resource"
+        "[concat('hidden-link:',resourceGroup().id,'/providers/microsoft.insights/components/',variables('applicationInsightsName'))]": "Resource"
       },
       "location": "westeurope",
       "properties": {
@@ -153,7 +155,19 @@
           "timeWindowInMinutes": 1440
         },
         "action": {
-          "odata.type": "Microsoft.WindowsAzure.Management.Monitoring.Alerts.Models.Microsoft.AppInsights.Nexus.DataContracts.Resources.ScheduledQueryRules.AlertingAction"
+          "odata.type": "Microsoft.WindowsAzure.Management.Monitoring.Alerts.Models.Microsoft.AppInsights.Nexus.DataContracts.Resources.ScheduledQueryRules.AlertingAction",
+          "severity": "1",
+          "aznsAction": {
+            "actionGroup": [
+              "KeesMail"
+            ],
+            "emailSubject": "No motion detection for 24 hours",
+            "customWebhookPayload": "{}"
+          },
+          "trigger": {
+            "thresholdOperator": "LessThan",
+            "threshold": 1
+          }
         }
       },
       "dependsOn": [
