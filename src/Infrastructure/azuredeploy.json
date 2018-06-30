@@ -136,6 +136,9 @@
       "type": "microsoft.insights/scheduledqueryrules",
       "name": "[variables('alertRuleNoMotionName')]",
       "apiVersion": "2018-04-16",
+      "tags": {
+          "[concat('hidden-link:'resourceGroup().id,'/providers/microsoft.insights/components/',variables('applicationInsightsName'))": "Resource"
+      },
       "location": "westeurope",
       "properties": {
         "description": "No motion for 24 hr",
