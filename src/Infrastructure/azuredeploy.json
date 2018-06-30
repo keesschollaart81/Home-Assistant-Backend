@@ -26,7 +26,7 @@
   },
   "variables": {
     "prefix": "keeshassiobackend",
-    "functionHostingplanAppName": "[concat(variables('prefix'),'hp')]",
+    "functionHostingplanAppName": "[concat(variables('prefix'),'sf')]",
     "functionAppName": "[concat(variables('prefix'),'fa')]",
     "applicationInsightsName": "[concat(variables('prefix'),'ai')]",
     "storageAccountName": "[concat(variables('prefix'),'st')]",
