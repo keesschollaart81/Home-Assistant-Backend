@@ -76,18 +76,22 @@ namespace Functions
         {
             _log.LogInformation($"Getting the camera's image...");
 
-            using (var client = new HttpClient())
+            using (var httpClientHandler = new HttpClientHandler())
             {
-                var authHeaderValue = Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes($"{_config.Username}:{_config.Password}"));
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authHeaderValue);
+                httpClientHandler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => { return true; };
+                using (var client = new HttpClient())
+                {
+                    var authHeaderValue = Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes($"{_config.Username}:{_config.Password}"));
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authHeaderValue);
 
-                var response = await client.GetAsync(_config.CamUrl);
-                response.EnsureSuccessStatusCode();
-                var outBytes = await response.Content.ReadAsByteArrayAsync();
+                    var response = await client.GetAsync(_config.CamUrl);
+                    response.EnsureSuccessStatusCode();
+                    var outBytes = await response.Content.ReadAsByteArrayAsync();
 
-                _log.LogInformation($"Blob received, size {outBytes.Length}");
+                    _log.LogInformation($"Blob received, size {outBytes.Length}");
 
-                return outBytes;
+                    return outBytes;
+                }
             }
         }
 
