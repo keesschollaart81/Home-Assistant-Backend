@@ -40,12 +40,16 @@ namespace Functions
             var motionConfiguration = new MotionConfiguration(context);
             var motionService = new MotionService(motionConfiguration, log);
             var motionDetectionResult = await motionService.DetectMotionAsync();
-            
+
             await outputBlob.UploadFromByteArrayAsync(motionDetectionResult.ImageBytes, 0, motionDetectionResult.ImageBytes.Length);
+            log.LogInformation($"5 {motionDetectionResult.ImageBytes.Length}");
+
             foreach (var mqttMessage in motionDetectionResult.MqttMessages)
             {
+                log.LogInformation($"6 {mqttMessage.Topic}");
                 outMessages.Add(mqttMessage);
             }
+
         }
     }
 }

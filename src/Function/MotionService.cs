@@ -66,7 +66,8 @@ namespace Functions
                     // https://github.com/SixLabors/ImageSharp/issues/574
                     // https://github.com/Azure/azure-functions-host/issues/2856
                 }
-            }
+                 _log.LogInformation("4");
+           }
             catch (Exception ex)
             {
                 _log.LogWarning(new EventId(0), ex, $"Unhandled Exception while processing motion detection: {ex.Message}");
