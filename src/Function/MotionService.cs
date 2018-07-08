@@ -37,37 +37,21 @@ namespace Functions
                 {
                     return result;
                 }
-                _log.LogInformation("1");
 
                 var meaningfulpredictions = await GetMeaningfulpredictions(cameraImage);
-                _log.LogInformation("2");
 
                 var mqttMessages = GetMqttMessagesForPredictions(meaningfulpredictions);
-                _log.LogInformation("3");
 
                 result.MqttMessages = mqttMessages;
                 result.ImageBytes = cameraImage;
 
-                try
+                using (var image = Image.Load(cameraImage))
+                using (var ms = new MemoryStream())
                 {
-                    // this does currently not work yet!
-
-                    using (var image = Image.Load(cameraImage))
-                    using (var ms = new MemoryStream())
-                    {
-                        image.Save(ms, new JpegEncoder()); // applies compression
-                        result.ImageBytes = ms.ToArray();
-                    }
+                    image.Save(ms, new JpegEncoder()); // applies compression
+                    result.ImageBytes = ms.ToArray();
                 }
-                catch (Exception ex)
-                {
-                    _log.LogWarning(new EventId(0), ex, "Image compression failed...");
-                    // ignore while:
-                    // https://github.com/SixLabors/ImageSharp/issues/574
-                    // https://github.com/Azure/azure-functions-host/issues/2856
-                }
-                 _log.LogInformation("4");
-           }
+            }
             catch (Exception ex)
             {
                 _log.LogWarning(new EventId(0), ex, $"Unhandled Exception while processing motion detection: {ex.Message}");
@@ -80,7 +64,7 @@ namespace Functions
         {
             _log.LogInformation($"Getting the camera's image...");
 
-            using (var httpClientHandler  = new HttpClientHandler())
+            using (var httpClientHandler = new HttpClientHandler())
             {
                 httpClientHandler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => { return true; };
                 using (var client = new HttpClient())
@@ -120,20 +104,20 @@ namespace Functions
         private IList<MqttMessage> GetMqttMessagesForPredictions(IEnumerable<PredictionModel> predictions)
         {
             var result = new List<MqttMessage>();
-            _log.LogInformation("a");
+            
             var doorPrediction = predictions.Where(x => x.TagName.Contains("door")).OrderByDescending(x => x.Probability).FirstOrDefault();
             var envelopeBodyDoor = doorPrediction == null ? "unkwown" : doorPrediction.TagName == "door-open" ? "open" : "closed";
             if (envelopeBodyDoor != "unkwown")
             {
                 result.Add(new MqttMessage("motion/door", Encoding.UTF8.GetBytes(envelopeBodyDoor), MqttQualityOfServiceLevel.AtLeastOnce, true));
             }
+
             var gatePrediction = predictions.Where(x => x.TagName.Contains("gate")).OrderByDescending(x => x.Probability).FirstOrDefault();
             var envelopeBodyGate = gatePrediction == null ? "unkwown" : gatePrediction.TagName == "gate-open" ? "open" : "closed";
             if (envelopeBodyGate != "unkwown")
             {
                 result.Add(new MqttMessage("motion/gate", Encoding.UTF8.GetBytes(envelopeBodyGate), MqttQualityOfServiceLevel.AtLeastOnce, true));
             }
-            _log.LogInformation("b");
 
             var bikeMarleen = predictions.Any(x => x.TagName == "bike-marleen");
             var envelopeBodyBikeMarleen = bikeMarleen ? "visible" : "not visible";
@@ -142,7 +126,6 @@ namespace Functions
             var bikeJasmijn = predictions.Any(x => x.TagName == "bike-jasmijn");
             var envelopeBodyBikeJasmijn = bikeJasmijn ? "visible" : "not visible";
             result.Add(new MqttMessage("motion/bike/jasmijn", Encoding.UTF8.GetBytes(envelopeBodyBikeJasmijn), MqttQualityOfServiceLevel.AtLeastOnce, true));
-            _log.LogInformation("c");
 
             return result;
         }

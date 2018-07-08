@@ -42,11 +42,9 @@ namespace Functions
             var motionDetectionResult = await motionService.DetectMotionAsync();
 
             await outputBlob.UploadFromByteArrayAsync(motionDetectionResult.ImageBytes, 0, motionDetectionResult.ImageBytes.Length);
-            log.LogInformation($"5 {motionDetectionResult.ImageBytes.Length}");
 
             foreach (var mqttMessage in motionDetectionResult.MqttMessages)
             {
-                log.LogInformation($"6 {mqttMessage.Topic}");
                 outMessages.Add(mqttMessage);
             }
 
