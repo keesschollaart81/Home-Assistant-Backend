@@ -37,10 +37,13 @@ namespace Functions
                 {
                     return result;
                 }
+                _log.LogInformation("1");
 
                 var meaningfulpredictions = await GetMeaningfulpredictions(cameraImage);
+                _log.LogInformation("2");
 
                 var mqttMessages = GetMqttMessagesForPredictions(meaningfulpredictions);
+                _log.LogInformation("3");
 
                 result.MqttMessages = mqttMessages;
                 result.ImageBytes = cameraImage;
@@ -76,7 +79,7 @@ namespace Functions
         {
             _log.LogInformation($"Getting the camera's image...");
 
-            using (var httpClientHandler = new HttpClientHandler())
+            using (var httpClientHandler  = new HttpClientHandler())
             {
                 httpClientHandler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => { return true; };
                 using (var client = new HttpClient())
@@ -116,7 +119,7 @@ namespace Functions
         private IList<MqttMessage> GetMqttMessagesForPredictions(IEnumerable<PredictionModel> predictions)
         {
             var result = new List<MqttMessage>();
-
+            _log.LogInformation("a");
             var doorPrediction = predictions.Where(x => x.TagName.Contains("door")).OrderByDescending(x => x.Probability).FirstOrDefault();
             var envelopeBodyDoor = doorPrediction == null ? "unkwown" : doorPrediction.TagName == "door-open" ? "open" : "closed";
             if (envelopeBodyDoor != "unkwown")
@@ -129,6 +132,7 @@ namespace Functions
             {
                 result.Add(new MqttMessage("motion/gate", Encoding.UTF8.GetBytes(envelopeBodyGate), MqttQualityOfServiceLevel.AtLeastOnce, true));
             }
+            _log.LogInformation("b");
 
             var bikeMarleen = predictions.Any(x => x.TagName == "bike-marleen");
             var envelopeBodyBikeMarleen = bikeMarleen ? "visible" : "not visible";
@@ -137,6 +141,7 @@ namespace Functions
             var bikeJasmijn = predictions.Any(x => x.TagName == "bike-jasmijn");
             var envelopeBodyBikeJasmijn = bikeJasmijn ? "visible" : "not visible";
             result.Add(new MqttMessage("motion/bike/jasmijn", Encoding.UTF8.GetBytes(envelopeBodyBikeJasmijn), MqttQualityOfServiceLevel.AtLeastOnce, true));
+            _log.LogInformation("c");
 
             return result;
         }
