@@ -198,7 +198,11 @@
         "second": {
           "foo": "bar",
           "oops":{
-            "asdasdasd":true
+            "asdasdasd":true,
+            "array":[
+              {"asd":"qqq"},
+              {"efg":"aaa"}
+            ]
           }
         }
       }
