@@ -190,6 +190,10 @@
     "applicationInsightsInstrumentationKey": {
       "type": "string",
       "value": "[reference(resourceId('Microsoft.Insights/components', variables('applicationInsightsName')), '2014-04-01').InstrumentationKey]"
+    },
+    "complex":{
+      "type": "object",
+      "value": { "someKey" : "someValue" }
     }
   }
 }
