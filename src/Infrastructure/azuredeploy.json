@@ -196,7 +196,10 @@
       "value": {
         "someKey": "someValue",
         "second": {
-          "foo": "bar"
+          "foo": "bar",
+          "oops":{
+            "asdasdasd":true
+          }
         }
       }
     }
