@@ -4,11 +4,12 @@
     <AzureFunctionsVersion>v2</AzureFunctionsVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.13" />
-    <PackageReference Include="CaseOnline.Azure.WebJobs.Extensions.Mqtt" Version="0.9.2-beta" />
+    <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.19" />
+    <PackageReference Include="CaseOnline.Azure.WebJobs.Extensions.Mqtt" Version="0.9.4-beta.602" />
     <PackageReference Include="Microsoft.Azure.CognitiveServices.Vision.CustomVision.Prediction" Version="0.10.0-preview"/>
-    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-dev001351"/>
+    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-dev001854"/>
     <PackageReference Include="SolarCalculator" Version="2.0.2"/>
+    <PackageRefernece Include="Microsoft.Azure.WebJobs.Extensions.Storage" Version="3.0.0-beta8" />
   </ItemGroup>
   <ItemGroup>
     <None Update="host.json">
@@ -20,6 +21,9 @@
     </None>
   </ItemGroup>
   <PropertyGroup>
-  <RestoreAdditionalProjectSources>https://www.myget.org/F/sixlabors/api/v3/index.json</RestoreAdditionalProjectSources> 
+  <RestoreAdditionalProjectSources>
+  https://www.myget.org/F/sixlabors/api/v3/index.json;
+  https://www.myget.org/F/caseonline/api/v3/index.json;
+  </RestoreAdditionalProjectSources> 
 </PropertyGroup>
 </Project>

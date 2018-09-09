@@ -16,8 +16,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.WindowsAzure.Storage.Blob;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp.Processing.Transforms;
-using SixLabors.ImageSharp.Processing.Filters;
 
 namespace Functions
 {
@@ -35,7 +33,7 @@ namespace Functions
             {
                 log.LogInformation("Received motion but it's dark outside");
                 return;
-            }
+            } 
 
             var motionConfiguration = new MotionConfiguration(context);
             var motionService = new MotionService(motionConfiguration, log);
