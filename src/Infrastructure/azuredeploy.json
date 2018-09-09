@@ -51,10 +51,12 @@
       "apiVersion": "2015-04-01",
       "name": "[variables('functionHostingplanAppName')]",
       "location": "[resourceGroup().location]",
+      "kind": "app",
+      "sku": {
+        "name": "B1"
+      },
       "properties": {
-        "name": "[variables('functionHostingplanAppName')]",
-        "computeMode": "Dynamic",
-        "sku": "Dynamic"
+        "name": "[variables('functionHostingplanAppName')]"
       }
     },
     {
