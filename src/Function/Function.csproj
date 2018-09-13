@@ -23,7 +23,8 @@
   <PropertyGroup>
   <RestoreAdditionalProjectSources>
   https://www.myget.org/F/sixlabors/api/v3/index.json;
-  https://www.myget.org/F/caseonline/api/v3/index.json;
+  https://www.myget.org/F/caseonline/api/v3/index.json; 
+  https://api.nuget.org/v3/index.json;
   </RestoreAdditionalProjectSources> 
 </PropertyGroup>
 </Project>
