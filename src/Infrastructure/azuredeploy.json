@@ -52,11 +52,10 @@
       "name": "[variables('functionHostingplanAppName')]",
       "location": "[resourceGroup().location]",
       "kind": "app",
-      "sku": {
-        "name": "B1"
-      },
       "properties": {
-        "name": "[variables('functionHostingplanAppName')]"
+        "name": "[variables('functionHostingplanAppName')]",
+        "computeMode": "Dynamic",
+        "sku": "Dynamic"
       }
     },
     {
