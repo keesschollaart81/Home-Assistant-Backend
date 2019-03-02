@@ -52,11 +52,10 @@
       "name": "[variables('functionHostingplanAppName')]",
       "location": "[resourceGroup().location]",
       "kind": "app",
-      "sku": {
-        "name": "B1"
-      },
       "properties": {
-        "name": "[variables('functionHostingplanAppName')]"
+        "name": "[variables('functionHostingplanAppName')]",
+        "computeMode": "Dynamic",
+        "sku": "Dynamic"
       }
     },
     {
@@ -68,7 +67,6 @@
       "properties": {
         "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('functionHostingplanAppName'))]",
         "siteConfig": {
-          "AlwaysOn": true,
           "appSettings": [
             {
               "name": "AzureWebJobsDashboard",

@@ -6,7 +6,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Function", "src\Function\Fu
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{72B83C2A-A02B-40AE-9F41-7B00DF5CF6CE}"
 	ProjectSection(SolutionItems) = preProject
-		src\Infrastructure\azuredeploy.json = Infrastructure\azuredeploy.json
+		src\Infrastructure\azuredeploy.json = src\Infrastructure\azuredeploy.json
+		README.md = README.md
 	EndProjectSection
 EndProject
 Global
