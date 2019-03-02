@@ -26,7 +26,7 @@ namespace Functions
     public static partial class Functions
     {
         [FunctionName("HourlyMotionCheckFunction")]
-        public static async Task HourlyMotionCheckFunction([TimerTrigger("0 */5 * * * *")]TimerInfo timerInfo,
+        public static async Task HourlyMotionCheckFunction([TimerTrigger("0 */15 * * * *")]TimerInfo timerInfo,
         [Mqtt(ConnectionString = "MqttConnectionForMotion")] ICollector<IMqttMessage> outMessages, 
         [Blob("motion-hourly/{sys.utcnow}.png", FileAccess.Write)] CloudBlockBlob outputBlob,
         ILogger log,
