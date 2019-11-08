@@ -87,8 +87,11 @@ namespace Functions
         {
             using (var stream = new MemoryStream(image))
             {
-                var endpoint = new PredictionEndpoint() { ApiKey = _config.PredictionKey };
-                var predictionResult = await endpoint.PredictImageAsync(new Guid(_config.ProjectId), stream);
+                var client = new CustomVisionPredictionClient()
+                {
+                    ApiKey = _config.PredictionKey
+                };
+                var predictionResult = await client.DetectImageAsync(new Guid(_config.ProjectId), "//todo", stream);
 
                 foreach (var c in predictionResult.Predictions)
                 {
@@ -104,7 +107,7 @@ namespace Functions
         private IList<MqttMessage> GetMqttMessagesForPredictions(IEnumerable<PredictionModel> predictions)
         {
             var result = new List<MqttMessage>();
-            
+
             var doorPrediction = predictions.Where(x => x.TagName.Contains("door")).OrderByDescending(x => x.Probability).FirstOrDefault();
             var envelopeBodyDoor = doorPrediction == null ? "unkwown" : doorPrediction.TagName == "door-open" ? "open" : "closed";
             if (envelopeBodyDoor != "unkwown")
