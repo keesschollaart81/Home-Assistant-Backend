@@ -17,9 +17,6 @@
     "CamPassword": {
       "type": "securestring"
     },
-    "VisionApiPredictionKey": {
-      "type": "securestring"
-    },
     "VisionApiProjectId": {
       "type": "string"
     }
@@ -30,9 +27,32 @@
     "functionAppName": "[concat(variables('prefix'),'fa')]",
     "applicationInsightsName": "[concat(variables('prefix'),'ai')]",
     "storageAccountName": "[concat(variables('prefix'),'st')]",
-    "alertRuleNoMotionName": "[concat(variables('prefix'),'ar-nomotion')]"
+    "alertRuleNoMotionName": "[concat(variables('prefix'),'ar-nomotion')]",
+    "customVisionTrainingName": "[concat(variables('prefix'),'cv-training')]",
+    "customVisionPredictionName": "[concat(variables('prefix'),'cv-prediction')]"
   },
   "resources": [
+    {
+      "type": "Microsoft.CognitiveServices/accounts",
+      "apiVersion": "2017-04-18",
+      "name": "[variables('customVisionTrainingName')]",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "F0"
+      },
+      "kind": "CustomVision.Training",
+      "properties": {}
+    },{
+      "type": "Microsoft.CognitiveServices/accounts",
+      "apiVersion": "2017-04-18",
+      "name": "[variables('customVisionPredictionName')]",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "F0"
+      },
+      "kind": "CustomVision.Prediction",
+      "properties": {}
+    },
     {
       "type": "Microsoft.Storage/storageAccounts",
       "sku": {
@@ -102,7 +122,7 @@
             },
             {
               "name": "VisionApiPredictionKey",
-              "value": "[parameters('VisionApiPredictionKey')]"
+              "value": "[listKeys(resourceId('Microsoft.CognitiveServices/accounts', variables('customVisionPredictionName')), providers('Microsoft.CognitiveServices', 'accounts').apiVersions[0]).key1]"
             },
             {
               "name": "VisionApiProjectId",
@@ -118,7 +138,8 @@
       "dependsOn": [
         "[resourceId('Microsoft.Web/serverfarms', variables('functionHostingplanAppName'))]",
         "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
-        "[resourceId('microsoft.insights/components', variables('applicationInsightsName'))]"
+        "[resourceId('microsoft.insights/components', variables('applicationInsightsName'))]",
+        "[resourceId('Microsoft.CognitiveServices/accounts', variables('customVisionPredictionName'))]"
       ]
     },
     {
@@ -198,11 +219,15 @@
         "someKey": "someValue",
         "second": {
           "foo": "bar",
-          "oops":{
-            "asdasdasd":true,
-            "array":[
-              {"asd":"qqq"},
-              {"efg":"aaa"}
+          "oops": {
+            "asdasdasd": true,
+            "array": [
+              {
+                "asd": "qqq"
+              },
+              {
+                "efg": "aaa"
+              }
             ]
           }
         }
