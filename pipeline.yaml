@@ -1,0 +1,91 @@
+trigger:
+  - master
+  - dev
+
+variables:
+  - name: azureSubscription
+    value: "Kees Prive"
+  - name: functionAppName
+    value: "keeshassiobackendfa"
+  - name: resourceGroupName
+    value: "Home-Assistant-Backend"
+  - name: VisionApiModelName
+    value: Iteration1
+  - name: vmImageName
+    value: "vs2017-win2016"
+  - group: ha-backend-variables
+
+stages:
+  - stage: Build
+    displayName: "Build"
+    jobs:
+      - job: BuildFunctionApp
+        pool:
+          vmImage: $(vmImageName)
+
+        steps:
+          - task: DotNetCoreCLI@2
+            displayName: "Build project"
+            inputs:
+              projects: "**/Function.csproj"
+              arguments: "--output $(System.DefaultWorkingDirectory)/publish_output --configuration Release"
+
+          - task: ArchiveFiles@2
+            displayName: "Archive files"
+            inputs:
+              rootFolderOrFile: "$(System.DefaultWorkingDirectory)/publish_output"
+              includeRootFolder: false
+              archiveType: zip
+              archiveFile: $(Build.ArtifactStagingDirectory)/Functions.zip
+              replaceExistingArchive: true
+
+          - task: CopyFiles@2
+            displayName: Stage ARM Template for publishing
+            inputs:
+              contents: "src/Infrastructure/azuredeploy.json"
+              TargetFolder: $(Build.ArtifactStagingDirectory)
+
+          - publish: $(Build.ArtifactStagingDirectory)
+            artifact: drop
+
+  - stage: Deploy
+    displayName: Deploy stage
+    dependsOn: Build
+    condition: succeeded()
+
+    jobs:
+      - deployment: Deploy
+        displayName: Deploy
+        environment: "production"
+        pool:
+          vmImage: $(vmImageName)
+
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: AzureResourceManagerTemplateDeployment@3
+                  displayName: "ARM Template deployment: Resource Group scope"
+                  inputs:
+                    ConnectedServiceName: "$(azureSubscription)"
+                    azureSubscription: "$(azureSubscription)"
+                    resourceGroupName: "$(resourceGroupName)"
+                    location: "West Europe"
+                    csmFile: "$(Pipeline.Workspace)/drop/azuredeploy.json"
+                    overrideParameters: "-MqttConnectionString $(MqttConnectionString) -MqttConnectionStringForMotion $(MqttConnectionStringForMotion) -CamUrl $(CamUrl) -CamUsername $(CamUsername) -CamPassword $(CamPassword) -VisionApiProjectId $(VisionApiProjectId) -VisionApiModelName $(VisionApiModelName)"
+
+                - task: keesschollaart.arm-outputs-development.arm-outputs.ARM Outputs@5
+                  displayName: "ARM Outputs"
+                  inputs:
+                    ConnectedServiceNameARM: "$(azureSubscription)"
+                    resourceGroupName: "$(azureSubscription)"
+
+                - task: AzureRmWebAppDeployment@4
+                  displayName: "Azure functions app deploy"
+                  inputs:
+                    azureSubscription: "$(azureSubscription)"
+                    appType: functionApp
+                    WebAppName: $(functionAppName)
+                    enableCustomDeployment: true
+                    deploymentMethod: zipDeploy
+                    package: "$(Pipeline.Workspace)/drop/Functions.zip"
