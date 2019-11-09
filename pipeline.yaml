@@ -71,7 +71,7 @@ stages:
                     azureSubscription: "$(azureSubscription)"
                     resourceGroupName: "$(resourceGroupName)"
                     location: "West Europe"
-                    csmFile: "$(Pipeline.Workspace)/drop/azuredeploy.json"
+                    csmFile: "$(Pipeline.Workspace)/drop/src/Infrastructure/azuredeploy.json"
                     overrideParameters: "-MqttConnectionString $(MqttConnectionString) -MqttConnectionStringForMotion $(MqttConnectionStringForMotion) -CamUrl $(CamUrl) -CamUsername $(CamUsername) -CamPassword $(CamPassword) -VisionApiProjectId $(VisionApiProjectId) -VisionApiModelName $(VisionApiModelName)"
 
                 - task: keesschollaart.arm-outputs-development.arm-outputs.ARM Outputs@5
