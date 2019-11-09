@@ -1,51 +1,63 @@
 
 using System.IO;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Azure.WebJobs.Host;
-using Newtonsoft.Json;
 using CaseOnline.Azure.WebJobs.Extensions.Mqtt.Messaging;
 using CaseOnline.Azure.WebJobs.Extensions.Mqtt;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using System;
-using System.Configuration;
-using Microsoft.Extensions.Configuration;
 using Microsoft.WindowsAzure.Storage.Blob;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
 
 namespace Functions
 {
-    public static partial class Functions
+    public partial class Functions
     {
-        [FunctionName("MotionFunction")]
-        public static async Task MotionFunction(
-        [MqttTrigger("dafang/dafang/motion", ConnectionString = "MqttConnectionForMotion")]IMqttMessage snapshop,
-        [Mqtt(ConnectionString = "MqttConnectionForMotion")] ICollector<IMqttMessage> outMessages,
-        [Blob("motion/{sys.utcnow}.png", FileAccess.Write)] CloudBlockBlob outputBlob,
-        ILogger log,
-        ExecutionContext context)
+        [FunctionName(nameof(MotionFunction))]
+        public async Task MotionFunction(
+            [MqttTrigger("dafang/dafang/motion", ConnectionString = "MqttConnectionForMotion")]IMqttMessage snapshot,
+            [Mqtt(ConnectionString = "MqttConnectionForMotion")] ICollector<IMqttMessage> outMessages,
+            [Blob("motion/{sys.utcnow}.png", FileAccess.Write)] CloudBlockBlob outputBlob,
+            ILogger log,
+            ExecutionContext context)
         {
-            if (DateTime.Now.IsDarkOutside())
-            {
-                log.LogInformation("Received motion but it's dark outside");
-                return;
-            } 
+            await DoCameraAndMotionMagic(outMessages, outputBlob, log, context);
+        }
 
+        [FunctionName(nameof(HourlyMotionCheckFunction))]
+        public async Task HourlyMotionCheckFunction([TimerTrigger("0 */15 * * * *")]TimerInfo timerInfo,
+            [Mqtt(ConnectionString = "MqttConnectionForMotion")] ICollector<IMqttMessage> outMessages,
+            [Blob("motion-hourly/{sys.utcnow}.png", FileAccess.Write)] CloudBlockBlob outputBlob,
+            ILogger log,
+            ExecutionContext context)
+        {
+            await DoCameraAndMotionMagic(outMessages, outputBlob, log, context);
+        }
+
+        public async Task DoCameraAndMotionMagic(
+            ICollector<IMqttMessage> outMessages,
+            CloudBlockBlob outputBlob,
+            ILogger log,
+            ExecutionContext context)
+        {
             var motionConfiguration = new MotionConfiguration(context);
-            var motionService = new MotionService(motionConfiguration, log);
-            var motionDetectionResult = await motionService.DetectMotionAsync();
+            var cameraService = new CameraService(motionConfiguration, log);
+            var cameraStill = await cameraService.GetCameraStill();
 
-            await outputBlob.UploadFromByteArrayAsync(motionDetectionResult.ImageBytes, 0, motionDetectionResult.ImageBytes.Length);
-
-            foreach (var mqttMessage in motionDetectionResult.MqttMessages)
+            try
             {
-                outMessages.Add(mqttMessage);
-            }
+                var motionService = new MotionService(motionConfiguration, log);
+                var motionDetectionResult = await motionService.DetectMotionAsync(cameraStill);
 
+                foreach (var mqttMessage in motionDetectionResult.MqttMessages)
+                {
+                    outMessages.Add(mqttMessage);
+                }
+            }
+            catch (Exception ex)
+            {
+                log.LogError(ex, "Error doing the AI stuff");
+            }
+            await outputBlob.UploadFromByteArrayAsync(cameraStill, 0, cameraStill.Length);
         }
     }
 }

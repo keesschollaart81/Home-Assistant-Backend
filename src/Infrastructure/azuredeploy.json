@@ -19,6 +19,9 @@
     },
     "VisionApiProjectId": {
       "type": "string"
+    },
+    "VisionApiModelName": {
+      "type": "string"
     }
   },
   "variables": {
@@ -127,6 +130,10 @@
             {
               "name": "VisionApiProjectId",
               "value": "[parameters('VisionApiProjectId')]"
+            },
+            {
+              "name": "VisionApiModelName",
+              "value": "[parameters('VisionApiModelName')]"
             },
             {
               "name": "APPINSIGHTS_INSTRUMENTATIONKEY",

@@ -10,6 +10,7 @@ namespace Functions
         public string Password { get; }
         public string PredictionKey { get; }
         public string ProjectId { get; }
+        public string ModelName { get; internal set; }
 
         public MotionConfiguration(ExecutionContext context)
         {
@@ -24,6 +25,7 @@ namespace Functions
             Password = config["CamPassword"];
             PredictionKey = config["VisionApiPredictionKey"];
             ProjectId = config["VisionApiProjectId"];
+            ModelName = config["ModelName"];
         }
     }
 }

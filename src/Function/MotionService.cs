@@ -26,13 +26,11 @@ namespace Functions
             _config = config;
             _log = log;
         }
-        public async Task<DetectMotionResult> DetectMotionAsync()
+        public async Task<DetectMotionResult> DetectMotionAsync(byte[] cameraImage)
         {
             var result = new DetectMotionResult();
             try
             {
-                var cameraImage = await GetCameraStill();
-
                 if (cameraImage.Length <= 0)
                 {
                     return result;
@@ -60,29 +58,6 @@ namespace Functions
             return result;
         }
 
-        private async Task<byte[]> GetCameraStill()
-        {
-            _log.LogInformation($"Getting the camera's image...");
-
-            using (var httpClientHandler = new HttpClientHandler())
-            {
-                httpClientHandler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => { return true; };
-                using (var client = new HttpClient())
-                {
-                    var authHeaderValue = Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes($"{_config.Username}:{_config.Password}"));
-                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", authHeaderValue);
-
-                    var response = await client.GetAsync(_config.CamUrl);
-                    response.EnsureSuccessStatusCode();
-                    var outBytes = await response.Content.ReadAsByteArrayAsync();
-
-                    _log.LogInformation($"Blob received, size {outBytes.Length}");
-
-                    return outBytes;
-                }
-            }
-        }
-
         private async Task<IEnumerable<PredictionModel>> GetMeaningfulpredictions(byte[] image)
         {
             using (var stream = new MemoryStream(image))
@@ -91,7 +66,7 @@ namespace Functions
                 {
                     ApiKey = _config.PredictionKey
                 };
-                var predictionResult = await client.DetectImageAsync(new Guid(_config.ProjectId), "//todo", stream);
+                var predictionResult = await client.DetectImageAsync(new Guid(_config.ProjectId), _config.ModelName, stream);
 
                 foreach (var c in predictionResult.Predictions)
                 {
