@@ -78,7 +78,7 @@ stages:
                   displayName: "ARM Outputs"
                   inputs:
                     ConnectedServiceNameARM: "$(azureSubscription)"
-                    resourceGroupName: "$(azureSubscription)"
+                    resourceGroupName: "$(resourceGroupName)"
 
                 - task: AzureRmWebAppDeployment@4
                   displayName: "Azure functions app deploy"
