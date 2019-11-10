@@ -64,7 +64,8 @@ namespace Functions
             {
                 var client = new CustomVisionPredictionClient()
                 {
-                    ApiKey = _config.PredictionKey
+                    ApiKey = _config.PredictionKey,
+                    Endpoint = _config.PredictionEndpoint
                 };
                 var predictionResult = await client.DetectImageAsync(new Guid(_config.ProjectId), _config.ModelName, stream);
 

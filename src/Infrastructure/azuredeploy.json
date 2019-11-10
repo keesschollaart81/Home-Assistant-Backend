@@ -32,7 +32,8 @@
     "storageAccountName": "[concat(variables('prefix'),'st')]",
     "alertRuleNoMotionName": "[concat(variables('prefix'),'ar-nomotion')]",
     "customVisionTrainingName": "[concat(variables('prefix'),'cv-training')]",
-    "customVisionPredictionName": "[concat(variables('prefix'),'cv-prediction')]"
+    "customVisionPredictionName": "[concat(variables('prefix'),'cv-prediction')]",
+    "customVisionPredictionId": "[concat(resourceGroup().id,'/providers/','Microsoft.CognitiveServices/accounts/', variables('customVisionPredictionName'))]"
   },
   "resources": [
     {
@@ -124,8 +125,12 @@
               "value": "[parameters('CamPassword')]"
             },
             {
+              "name": "VisionApiPredictionEndpoint",
+              "value": "[reference(variables('customVisionPredictionId'),'2016-02-01-preview').endpoint]"
+            },
+            {
               "name": "VisionApiPredictionKey",
-              "value": "[listKeys(resourceId('Microsoft.CognitiveServices/accounts', variables('customVisionPredictionName')), providers('Microsoft.CognitiveServices', 'accounts').apiVersions[0]).key1]"
+              "value": "[listKeys(variables('customVisionPredictionId'),'2016-02-01-preview').key1]"
             },
             {
               "name": "VisionApiProjectId",

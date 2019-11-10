@@ -9,6 +9,7 @@ namespace Functions
         public string Username { get; }
         public string Password { get; }
         public string PredictionKey { get; }
+        public string PredictionEndpoint {get;}
         public string ProjectId { get; }
         public string ModelName { get; internal set; }
 
@@ -26,6 +27,7 @@ namespace Functions
             PredictionKey = config["VisionApiPredictionKey"];
             ProjectId = config["VisionApiProjectId"];
             ModelName = config["ModelName"];
+            PredictionEndpoint = config["VisionApiPredictionEndpoint"];
         }
     }
 }
