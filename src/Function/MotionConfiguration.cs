@@ -26,7 +26,7 @@ namespace Functions
             Password = config["CamPassword"];
             PredictionKey = config["VisionApiPredictionKey"];
             ProjectId = config["VisionApiProjectId"];
-            ModelName = config["ModelName"];
+            ModelName = config["VisionApiModelName"];
             PredictionEndpoint = config["VisionApiPredictionEndpoint"];
         }
     }
